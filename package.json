@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "axios": "^0.22.0",
+    "child_process": "^1.0.2",
+    "express": "^4.17.1",
+    "read-last-lines": "^1.8.0"
+  }
+}
