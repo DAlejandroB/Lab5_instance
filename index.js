@@ -22,16 +22,16 @@ function addInstance(){
         }
         else{
             instances.forEach(inst => {
-                axios.post(`http://${ip}:${inst.port}/add_instance`,new_instance).then(response =>{
-                    console.log(response);
-                }).catch(e =>{
-                    console.error(e);
+                axios.post(`http://${ip}:${inst_port}/add_instance`,new_instance).then(response =>{
+                    console.log(response.body);
+                }).catch(function (error){
+                    console.error(error);
                 });
             });
-            axios.post(`http://${ip}:${inst.port}/set_leader`, id).then(response =>{            
-                console.log(response);    
+            axios.post(`http://${ip}:${inst_port}/set_leader`, id).then(response =>{            
+                console.log(response.body);    
             }).catch(e =>{
-                console.error(e);
+                //console.error(e);
             });
         }
     });
@@ -39,7 +39,7 @@ function addInstance(){
 
 app.post('/set_leader', (req, res)=>{
     leader_id = req.body.id;
-    res.send("leader acknowledged");
+    res.send({message:"leader acknowledged"});
 });
 app.post('/add_instance', (req, res)=>{
     if(leader_id == id){
@@ -50,12 +50,12 @@ app.post('/add_instance', (req, res)=>{
         }
         addInstance();
         instances.push(new_instance);
-        res.send(`instance created succesfully`)
+        res.send({message : `instance created succesfully`})
     }
     else{
         console.log(req.body);
         /*instances.push(req.body);*/
-        res.send(`instance ${req.body.id} added succesfully in ${id}`)
+        res.send({message : `instance ${req.body.id} added succesfully in ${id}`})
     }
 });
 app.get('/', (req, res)=>{
