@@ -36,7 +36,7 @@ function addInstance(){
             }
             instances.push(new_instance);
             console.log(instances);
-            axios.post(`http://${ip}:${inst_port}/set_leader`, id).then(response =>{            
+            axios.post(`http://${ip}:${inst_port}/set_leader`, {id:id}).then(response =>{            
                 console.log(response.body);    
             }).catch(e =>{
                 //console.error(e);
@@ -64,5 +64,5 @@ app.get('/', (req, res)=>{
     res.send("Hello World!")
 });
 setInterval(()=>{
-
+    console.log("Leader" + leader_id);
 }, 1000);
