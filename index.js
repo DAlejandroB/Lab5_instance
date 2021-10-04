@@ -3,7 +3,7 @@ const exec = require('child_process').exec;
 const readLastLines = require('read-last-lines');
 const axios = require('axios');
 const app = express();
-const ip = "localhost"
+const ip = "127.0.0.1"
 
 const port = process.env.PORT || 4001;
 const id = port - 4000;
@@ -23,7 +23,7 @@ function addInstance(){
         else{
             console.log(instances);
             instances.forEach(inst => {
-                axios.post(`http://${ip}:${inst_port}/add_instance`,{id:inst_port-4000, port:inst_port, status:null}).then(response =>{
+                axios.post(`http://${ip}:${inst.port}/add_instance`,{id:inst_port-4000, port:inst_port, status:null}).then(response =>{
                     console.log(response.body);
                 }).catch(function (error){
                     console.error("Fallo " + error);
@@ -56,7 +56,7 @@ app.post('/add_instance', (req, res)=>{
     }
     else{
         console.log(req.body);
-        instances.push(new_instance);
+        instances.push(req.body);
         res.send({message : `instance ${req.body.id} added succesfully in ${id}`})
     }
 });
@@ -65,4 +65,4 @@ app.get('/', (req, res)=>{
 });
 setInterval(()=>{
     console.log("Leader" + leader_id);
-}, 1000);
+}, 10000);
