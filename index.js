@@ -3,6 +3,7 @@ const exec = require('child_process').exec;
 const readLastLines = require('read-last-lines');
 const axios = require('axios');
 const app = express();
+app.use(express.json());
 const ip = "127.0.0.1"
 
 const port = process.env.PORT || 4001;
