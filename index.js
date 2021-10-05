@@ -4,6 +4,7 @@ const readLastLines = require('read-last-lines');
 const axios = require('axios');
 const app = express();
 app.use(express.json());
+app.use(express.static("public"));
 const ip = "172.17.0."
 
 const port = process.env.PORT || 4001;
@@ -19,7 +20,11 @@ const server = app.listen(port, ()=>{
         port: port,
         status: "OK"
     });
+    io.emit("info", instances);
 });
+
+const SocketIO = require('socket.io');
+const io = SocketIO(server);
 
 function addInstance(){
     inst_port = instances.length+4001;
@@ -54,14 +59,6 @@ function addInstance(){
     });
 }
 
-//Codigo de prueba para comprobar el funcionamiento del metodo setLeader
-/* setTimeout(()=>{
-    console.log("changing leader");
-    instances.forEach(inst => {
-        axios.post(`http://${ip}:${inst.port}/set_leader`, {id:2});
-    });
-},25000); */
-
 app.post('/set_leader', (req, res)=>{
     leader_id = req.body.id;
     isInElection = false;
@@ -80,7 +77,8 @@ app.post('/add_instance', (req, res)=>{
 });
 
 app.get('/', (req, res)=>{
-    res.send("Hello World! " + id + "\n")
+    res.sendFile(__dirname + '/public/index.html');
+    io.emit("info", instances);
 });
 
 app.get('/status', (req, res) => { 
@@ -128,6 +126,8 @@ function initElection(){
 
 interval = 2000;
 setInterval(()=>{
+    io.emit("info", instances);
+    io.emit("port", port);
     if(!isInElection){
         if(leader_id != id){
             interval = getRandom(1000,2000)
@@ -140,7 +140,7 @@ setInterval(()=>{
             instances.forEach(instance => {
                 interval = 2000;
                 if(instance.id != id){
-                    console.log(`addressing ${ip}${leader_id+1} ${instance.port}`)
+                    console.log(`addressing ${ip}${instances.length+1} ${instance.port}`)
                     exec(`sh watch.sh ${ip}${leader_id+1} ${instance.port}`, (error, stout, stderr) => {
                         if (error !== null) {
                             //console.log(`exec error: ${error}`);
