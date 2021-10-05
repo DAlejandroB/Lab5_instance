@@ -143,7 +143,7 @@ setInterval(()=>{
                 interval = 2000;
                 if(instance.id != id){
                     console.log(`addressing ${ip}${instances.length+1} ${instance.port}`)
-                    exec(`sh watch.sh ${ip}${leader_id+1} ${instance.port}`, (error, stout, stderr) => {
+                    exec(`sh watch.sh ${ip}${instance.id+1} ${instance.port}`, (error, stout, stderr) => {
                         if (error !== null) {
                             //console.log(`exec error: ${error}`);
                             console.error("There has been an error")
