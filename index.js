@@ -130,8 +130,8 @@ interval = 2000;
 setInterval(()=>{
     if(!isInElection){
         if(leader_id != id){
-            interval = getRandom(1000,2000).then(response => console.log(response.data)).catch(error => console.log("Error"));
-            axios.get("http://localhost:4001/status")
+            interval = getRandom(1000,2000)
+            axios.get("http://localhost:4001/status").then(response => console.log(response.data)).catch(error => console.log("Error"));
             /* console.log(`attempting communication at http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`);
             axios.get(`http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`).then(response => 
             console.log(response.data)).catch(error => console.error()); */
