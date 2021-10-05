@@ -4,7 +4,7 @@ const readLastLines = require('read-last-lines');
 const axios = require('axios');
 const app = express();
 app.use(express.json());
-const ip = "127.0.0.1"
+const ip = "172.17.0."
 
 const port = process.env.PORT || 4001;
 const id = port - 4000;
@@ -36,7 +36,7 @@ function addInstance(){
             instances.push(new_instance);
             instances.forEach(inst => {
                 if(inst.id != new_instance.id && inst.id != id){
-                    axios.post(`http://${ip}:${inst.port}/add_instance`,instances).then(response =>{
+                    axios.post(`http://${ip}${inst.id+1}:${inst.port}/add_instance`,instances).then(response =>{
                         console.log(response.data);
                     }).catch(function (error){
                         console.error("Fallo " + error);
@@ -45,10 +45,10 @@ function addInstance(){
                 });
             console.log(instances);
             setTimeout(()=>{
-                axios.post(`http://${ip}:${inst_port}/set_leader`, {id:id}).catch(e =>{
+                axios.post(`http://${ip}${new_instance.id+1}:${inst_port}/set_leader`, {id:id}).catch(e =>{
                     console.error(e);
                 });
-                axios.post(`http://${ip}:${inst_port}/add_instance`, instances);
+                axios.post(`http://${ip}${new_instance.id+1}:${inst_port}/add_instance`, instances);
             },5000);
         }
     });
@@ -80,7 +80,7 @@ app.post('/add_instance', (req, res)=>{
 });
 
 app.get('/', (req, res)=>{
-    res.send("Hello World!")
+    res.send("Hello World! " + id + "\n")
 });
 
 app.get('/status', (req, res) => { 
@@ -108,20 +108,20 @@ function initElection(){
             let is_candidate = false;
             if(instance.id > id)
                 is_candidate = true;
-            axios.post(`http://${ip}:${instance.port}/init_election`, {isCandidate:is_candidate}).then(response => {
+            axios.post(`http://${ip}${instance.id+1}:${instance.port}/init_election`, {isCandidate:is_candidate}).then(response => {
                 if(response.data.message === 'OK' && is_candidate) responded = true;
             }); 
         });
     }else{
         instances.forEach(instance => {
             if(instance.id > id){
-                axios.post(`http://${ip}:${instance.port}/init_election`, {isCandidate:true});
+                axios.post(`http://${ip}${instance.id+1}:${instance.port}/init_election`, {isCandidate:true});
             }
         });
     }
     if(!responded){
         instances.forEach(instance => {
-            axios.post(`http://${ip}:${instance.port}/set_leader`, {id:id});
+            axios.post(`http://${ip}${instance.id+1}:${instance.port}/set_leader`, {id:id});
         });
     }
 }
@@ -131,7 +131,7 @@ setInterval(()=>{
     if(!isInElection){
         if(leader_id != id){
             interval = getRandom(1000,2000)
-            axios.get("http://localhost:4001/status").then(response => console.log(response.data)).catch(error => console.log("Error"));
+            axios.get(`http://${ip}${leader_id+1}:${instance.port}/set_leader`).then(response => console.log(response.data)).catch(error => console.log("Error"));
             /* console.log(`attempting communication at http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`);
             axios.get(`http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`).then(response => 
             console.log(response.data)).catch(error => console.error()); */
@@ -139,10 +139,10 @@ setInterval(()=>{
             instances.forEach(instance => {
                 interval = 2000;
                 if(instance.id != id){
-                    exec(`sh watch.sh ${ip} ${instance.port}`, (error, stout, stderr) => {
+                    exec(`sh watch.sh ${ip}${leader_id+1} ${instance.port}`, (error, stout, stderr) => {
                         if (error !== null) {
                             //console.log(`exec error: ${error}`);
-                            console.log("There has been an error")
+                            console.error("There has been an error")
                         }
                     })
                 }
