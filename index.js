@@ -131,7 +131,7 @@ setInterval(()=>{
     if(!isInElection){
         if(leader_id != id){
             interval = getRandom(1000,2000);
-            axios.get(`http://${ip}:${leader_id}/status`).catch(function (error){
+            axios.get(`http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`).catch(function (error){
                 initElection();
             });
         }else{
