@@ -19,7 +19,6 @@ const server = app.listen(port, ()=>{
         port: port,
         status: "OK"
     });
-    addInstance();
 });
 
 function addInstance(){
