@@ -10,14 +10,16 @@ const port = process.env.PORT || 4001;
 const id = port - 4000;
 let leader_id = 1;
 let instances = [];
+let isInElection = false;
 
 const server = app.listen(port, ()=>{
+    console.log(`App is listening at port: ${port}`);
     instances.push({
         id: id,
         port: port,
         status: "OK"
     });
-    console.log(`App is listening at port: ${port}`);
+    addInstance();
 });
 
 function addInstance(){
@@ -52,6 +54,7 @@ function addInstance(){
         }
     });
 }
+
 //Codigo de prueba para comprobar el funcionamiento del metodo setLeader
 /* setTimeout(()=>{
     console.log("changing leader");
@@ -62,6 +65,7 @@ function addInstance(){
 
 app.post('/set_leader', (req, res)=>{
     leader_id = req.body.id;
+    isInElection = false;
     res.send({message:"leader acknowledged"});
 });
 app.post('/add_instance', (req, res)=>{
@@ -72,31 +76,94 @@ app.post('/add_instance', (req, res)=>{
     else{
         console.log(req.body);
         instances = req.body;
-        res.send({message: `instance ${instances.at(-1).id} added succesfully in ${id}`});
+        res.send({message: `instance ${instances.length} added succesfully in ${id}`});
     }
 });
+
 app.get('/', (req, res)=>{
     res.send("Hello World!")
 });
+
 app.get('/status', (req, res) => { 
     res.send("OK")
-})
-setInterval(()=>{
-    if(leader_id != id){
-        
+});
+
+app.post('/stop_instance', (req, res) =>{
+    tostop_id = req.body.id;
+    exec(`sh kill-server.sh instance${tostop_id}`);
+    res.send({message:`The instance ${tostop_id} has been stopped succesfully`})
+});
+app.post('/init_election', (req, res) =>{
+    isInElection = true;
+    if(req.body.isCandidate){
+        initElection();
+    }
+    res.send({message:"OK"});
+});
+function initElection(){
+    isInElection = true;
+    console.log("Starting a new election");
+    //Cambiar isInElection en todas las instancias
+    responded = false;
+    if(!isInElection){
+        instances.forEach(instance => {
+            let is_candidate = false;
+            if(instance.id > id)
+                is_candidate = true;
+            axios.post(`http://${ip}:${instance.port}/init_election`, {isCandidate:is_candidate}).then(response => {
+                if(response.data.message === 'OK' && is_candidate) responded = true;
+            }); 
+        });
     }else{
         instances.forEach(instance => {
-            if(instance.id != id){
-                console.log("pinging " + instance.port);
-                exec(`sh watch.sh ${ip} ${instance.port}`, (error, stout, stderr) => {
-                    if (error !== null) {
-                        console.log(`exec error: ${error}`);
-                    }
-                })
+            if(instance.id > id){
+
             }
         });
     }
-}, getRandom(1000,2000));
+    if(!responded){
+        instances.forEach(instance => {
+            axios.post(`http://${ip}:${instance.port}/set_leader`, {id:id});
+        });
+    }
+}
+
+interval = 2000;
+setInterval(()=>{
+    if(!isInElection){
+        if(leader_id != id){
+            interval = getRandom(1000,2000);
+            axios.get(`http://${ip}:${leader_id}/status`).catch(function (error){
+                initElection();
+            });
+        }else{
+            instances.forEach(instance => {
+                interval = 2000;
+                if(instance.id != id){
+                    exec(`sh watch.sh ${ip} ${instance.port}`, (error, stout, stderr) => {
+                        if (error !== null) {
+                            //console.log(`exec error: ${error}`);
+                            console.log("There has been an error")
+                        }
+                    })
+                }
+            });
+
+            readLastLines.read('log.txt', instances.length-1).then((text) => {
+                let lines = text.split('\n');
+                lines.splice(lines.length - 1)
+                for(i = 0; i < lines.length; i++){
+                    let port = parseInt(lines[i].substring(0,4));
+                    let status = lines[i].substring(5,lines[i].length);
+                    inst_index = instances.findIndex(ss => ss.port == port);
+                    instances[inst_index].status = status=="OK"? "OK":"FAIL";
+                }
+                console.log(instances);
+                console.log();
+            });
+        }
+    }
+}, interval);
 
 function getRandom(min, max){
     return Math.round(Math.random()*(max-min) + min);
