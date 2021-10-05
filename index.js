@@ -103,7 +103,6 @@ app.post('/init_election', (req, res) =>{
 function initElection(){
     isInElection = true;
     console.log("Starting a new election");
-    //Cambiar isInElection en todas las instancias
     responded = false;
     if(!isInElection){
         instances.forEach(instance => {
@@ -117,7 +116,7 @@ function initElection(){
     }else{
         instances.forEach(instance => {
             if(instance.id > id){
-
+                axios.post(`http://${ip}:${instance.port}/init_election`, {isCandidate:true});
             }
         });
     }
