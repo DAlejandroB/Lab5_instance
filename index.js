@@ -131,6 +131,7 @@ setInterval(()=>{
     if(!isInElection){
         if(leader_id != id){
             interval = getRandom(1000,2000)
+            console.log(`addressing http://${ip}${leader_id+1}:400${leader_id}/set_leader`)
             axios.get(`http://${ip}${leader_id+1}:400${leader_id}/set_leader`).then(response => console.log(response.data)).catch(error => console.log("Error"));
             /* console.log(`attempting communication at http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`);
             axios.get(`http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`).then(response => 
