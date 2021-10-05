@@ -131,7 +131,7 @@ setInterval(()=>{
     if(!isInElection){
         if(leader_id != id){
             interval = getRandom(1000,2000)
-            axios.get(`http://${ip}${leader_id+1}:${instance.port}/set_leader`).then(response => console.log(response.data)).catch(error => console.log("Error"));
+            axios.get(`http://${ip}${leader_id+1}:400${leader_id}/set_leader`).then(response => console.log(response.data)).catch(error => console.log("Error"));
             /* console.log(`attempting communication at http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`);
             axios.get(`http://${ip}:${instances[instances.findIndex(inst => inst.id =leader_id)].port}/status`).then(response => 
             console.log(response.data)).catch(error => console.error()); */
@@ -155,7 +155,8 @@ setInterval(()=>{
                     let port = parseInt(lines[i].substring(0,4));
                     let status = lines[i].substring(5,lines[i].length);
                     inst_index = instances.findIndex(ss => ss.port == port);
-                    instances[inst_index].status = status=="OK"? "OK":"FAIL";
+                    if(instances[inst_index] != undefined)
+                        instances[inst_index].status = status=="OK"? "OK":"FAIL";
                 }
                 console.log(instances);
                 console.log();
