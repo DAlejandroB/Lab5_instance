@@ -159,8 +159,11 @@ setInterval(()=>{
                     let port = parseInt(lines[i].substring(0,4));
                     let status = lines[i].substring(5,lines[i].length);
                     inst_index = instances.findIndex(ss => ss.port == port);
-                    if(instances[inst_index] != undefined)
-                        instances[inst_index].status = status=="OK"? "OK":"FAIL";
+                        if(instances[inst_index] != undefined){
+                            instances[inst_index].status = status=="OK"? "OK":"FAIL";
+                        if (leader_id == instances[inst_index].id)
+                            instances[inst_index].status = "LEADER";
+                    }
                 }
                 console.log(instances);
                 console.log();

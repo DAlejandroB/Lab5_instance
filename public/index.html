@@ -20,6 +20,9 @@
                               <thead class="bg-gray-50">
                                   <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
+                                        ID
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
                                           Nombre Instancia
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
@@ -48,21 +51,22 @@
                     instances = arg;
                 })
                 for(i = 0; i < instances.length; i++){
+                    var s = "grey";
                     if(instances[i].status=="OK"){
-                        content.innerHTML += `<tr style="background:green;">
-                        <td class="text-center" style="background:green;">instancia${instances[i].id}</td>
-                        <td class="text-center" style="background:green;">${instances[i].port}</td>
-                        <td class="text-center" style="background:green;"><input type=button id="kill-instance" value="Stop Instance"></td>
-                        </tr>`;
+                        s = "green";
+                    }else if(instances[i].status=="LEADER"){
+                        s = "blue";
                     }else{
-                        content.innerHTML += `<tr style="background:red;">
-                        <td class="text-center" style="background:red;">instancia${instances[i].id}</td>
-                        <td class="text-center" style="background:red;">${instances[i].port}</td>
-                        <td class="text-center" style="background:red;"></td>
-                        </tr>`;
+                        s = "red";
                     }
+                    content.innerHTML += `<tr style="background:${s};">
+                    <td class="text-center" style="background:${s};">instancia${id}</td>
+                    <td class="text-center" style="background:${s};">instancia${instances[i].id}</td>
+                    <td class="text-center" style="background:${s};">${instances[i].port}</td>
+                    <td class="text-center" style="background:green;"><input type=button id="kill-instance" value="Stop Instance"></td>
+                    </tr>`;
                 }
-            })
+            });
         </script>
     </body>
 </html>

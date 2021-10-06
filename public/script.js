@@ -10,14 +10,6 @@ socket.on("port", (arg)=>{
 }); */
 document.getElementById("add-instance").addEventListener("click", function(){
     $.ajax({
-        url:`http://127.0.0.1:${port}/add_instance`
+        url:`http://172.17.0.${port-3999}:${port}/add_instance`
     })
 })
-function timechange(time){
-    $.ajax({
-        url:`http://localhost:${port}/timechange`,
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(time)
-    }).then(res=> console.log(res))
-}
